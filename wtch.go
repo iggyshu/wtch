@@ -31,11 +31,13 @@ func displayMemory() {
 	fmt.Println("MEMORY")
 	fmt.Printf("Total:      %d MB\n", totalMB)
 	fmt.Printf("Available:  %d MB\n", availableMB)
-	fmt.Printf("Used:       %.1f %%\n", usedPercent)
+	usedMessage := fmt.Sprintf("Used:       %.1f %%", usedPercent)
+	fmt.Println(percentToColor(usedPercent, usedMessage))
+
 	fmt.Println()
 }
 
-func displayCPU() {
+func displayCpu() {
 	p, _ := cpu.Percent(0, true)
 	infos, _ := cpu.Info()
 	cpuInfo := infos[0]
@@ -43,9 +45,21 @@ func displayCPU() {
 	fmt.Println("CPU")
 	fmt.Printf("Model: %v, Cores: %v, Mhz: %v\n", cpuInfo.ModelName, cpuInfo.Cores, cpuInfo.Mhz)
 	for i, percent := range p {
-		fmt.Printf("Core %v: %.1f %%\n", i+1, percent)
+		info := fmt.Sprintf("Core %v: %.1f %%", i+1, percent)
+		fmt.Println(percentToColor(percent, info))
 	}
 	fmt.Println()
+}
+
+func percentToColor(percent float64, message string) string {
+	switch {
+	case percent >= 75:
+		return fmt.Sprintf("\033[0;31m%v\033[0m", message) // red
+	case percent >= 35:
+		return fmt.Sprintf("\033[0;33m%v\033[0m", message) // yellow
+	default:
+		return message
+	}
 }
 
 func watch() {
@@ -53,7 +67,7 @@ func watch() {
 		clearScreen()
 		displayHeader()
 		displayMemory()
-		displayCPU()
+		displayCpu()
 
 		time.Sleep(1 * time.Second)
 	}
