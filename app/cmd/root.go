@@ -1,12 +1,40 @@
-package main
+package cmd
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/shirou/gopsutil/v4/cpu"
 	"github.com/shirou/gopsutil/v4/mem"
+	"github.com/spf13/cobra"
 )
+
+var rootCmd = &cobra.Command{
+	Use:   "wtch",
+	Short: "Cross-platform TUI for monitoring system resources",
+	Run: func(cmd *cobra.Command, args []string) {
+		watch()
+	},
+}
+
+func Execute() {
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+
+func watch() {
+	for {
+		clearScreen()
+		displayHeader()
+		displayMemory()
+		displayCpu()
+
+		time.Sleep(1 * time.Second)
+	}
+}
 
 func clearScreen() {
 	fmt.Print("\033[H\033[2J")
@@ -14,6 +42,7 @@ func clearScreen() {
 
 func displayHeader() {
 	fmt.Println("wtch")
+	fmt.Println("CTRL-C to exit...")
 	fmt.Println()
 }
 
@@ -60,19 +89,4 @@ func percentToColor(percent float64, message string) string {
 	default:
 		return message
 	}
-}
-
-func watch() {
-	for {
-		clearScreen()
-		displayHeader()
-		displayMemory()
-		displayCpu()
-
-		time.Sleep(1 * time.Second)
-	}
-}
-
-func main() {
-	watch()
 }
